@@ -30,7 +30,7 @@ body {
 }
 
 header {
-  padding: 2rem;
+  padding: 1.5rem 2rem 1rem 2rem;
   text-align: center;
   background: var(--glass-bg);
   backdrop-filter: blur(12px);
@@ -42,7 +42,7 @@ header {
 
 h1 {
   margin: 0;
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   font-weight: 800;
   background: linear-gradient(to right, var(--primary), var(--secondary));
   -webkit-background-clip: text;
@@ -53,8 +53,8 @@ h1 {
 
 .subtitle {
   color: #94a3b8;
-  margin-top: 0.5rem;
-  font-size: 1.1rem;
+  margin-top: 0.25rem;
+  font-size: 1rem;
 }
 
 .source-link {
@@ -387,5 +387,28 @@ select {
 }
 
 .hidden {
-  display: none;
+  display: none !important;
+}
+
+@media (max-width: 800px) {
+  .comparison-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+  }
+
+  .github-link {
+    bottom: 1rem;
+    right: 1rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+  }
+
+  .actions {
+    gap: 0.75rem;
+  }
 }

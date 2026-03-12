@@ -242,6 +242,7 @@ class Simulator {
     if (state.model) {
       this.comboBox.setValue(state.model);
     }
+    // If it's manual, we need to set the TPS from state
     if (state.model === 'Manual Control' && state.tps) {
       this.slider.value = state.tps;
       this.display.textContent = state.tps;
