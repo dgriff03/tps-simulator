@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TPS Simulator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@400;700&display=swap"
+    rel="stylesheet">
+</head>
+
+<body>
+  <header>
+    <h1>TPS Simulator</h1>
+    <p class="subtitle">Experience AI model streaming speeds in real-time</p>
+    <a href="https://artificialanalysis.ai/models/claude-opus-4-6-adaptive" target="_blank" class="source-link">Source:
+      Artificial Analysis</a>
+  </header>
+
+  <main>
+    <section class="controls">
+      <div class="control-group">
+        <div class="actions">
+          <button id="start-btn" class="btn">Start Simulation</button>
+          <button id="stop-btn" class="btn btn-outline">Stop</button>
+          <button id="clear-btn" class="btn btn-outline">Clear</button>
+          <button id="compare-toggle-btn" class="btn btn-outline">Add Comparison</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="comparison-grid single-view" id="comparison-container">
+      <!-- Model A -->
+      <div class="simulator-card" id="card-a">
+        <div class="card-header">
+          <div class="combo-box" id="combo-a">
+            <input type="text" id="model-a-input" class="combo-input" placeholder="Select model..."
+              value="Manual Control" autocomplete="off">
+            <div id="model-a-options" class="combo-options"></div>
+          </div>
+          <div id="manual-control-a" class="slider-container mini-slider">
+            <input type="range" id="tps-slider-a" min="1" max="500" value="50">
+            <span class="tps-value-mini" id="tps-display-a">50</span>
+          </div>
+        </div>
+        <div class="terminal" id="terminal-a">
+          <div class="content"></div>
+          <span class="cursor"></span>
+        </div>
+        <div class="stats">
+          <span id="stats-a-tps">Current TPS: 0</span>
+          <span id="stats-a-tokens">Tokens: 0</span>
+        </div>
+      </div>
+
+      <!-- Model B -->
+      <div class="simulator-card hidden" id="card-b">
+        <div class="card-header">
+          <div class="combo-box" id="combo-b">
+            <input type="text" id="model-b-input" class="combo-input" placeholder="Select model..."
+              value="Manual Control" autocomplete="off">
+            <div id="model-b-options" class="combo-options"></div>
+          </div>
+          <div id="manual-control-b" class="slider-container mini-slider">
+            <input type="range" id="tps-slider-b" min="1" max="500" value="50">
+            <span class="tps-value-mini" id="tps-display-b">50</span>
+          </div>
+          <button id="close-b-btn" class="close-btn">&times;</button>
+        </div>
+        <div class="terminal" id="terminal-b">
+          <div class="content"></div>
+          <span class="cursor"></span>
+        </div>
+        <div class="stats">
+          <span id="stats-b-tps">Current TPS: 0</span>
+          <span id="stats-b-tokens">Tokens: 0</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
