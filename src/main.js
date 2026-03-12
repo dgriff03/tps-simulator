@@ -58,11 +58,20 @@ class ComboBox {
   }
 
   init() {
-    this.input.addEventListener('focus', () => this.showOptions());
+    this.input.addEventListener('focus', () => {
+      if (this.input.value === 'Manual Control') {
+        this.input.value = '';
+      }
+      this.showOptions();
+    });
+
     this.input.addEventListener('input', () => this.filterOptions());
 
     document.addEventListener('click', (e) => {
       if (!this.container.contains(e.target)) {
+        if (this.input.value === '') {
+          this.input.value = 'Manual Control';
+        }
         this.hideOptions();
       }
     });
@@ -104,10 +113,15 @@ class ComboBox {
       this.optionsContainer.appendChild(div);
     });
   }
+
+  setValue(val) {
+    this.input.value = val;
+    this.onSelect(val);
+  }
 }
 
 class Simulator {
-  constructor(cardId, terminalId, statsTpsId, statsTokensId, sliderId, displayId, manualControlId, comboId, optionsId, inputId) {
+  constructor(cardId, terminalId, statsTpsId, statsTokensId, sliderId, displayId, manualControlId, staticTpsId, comboId, optionsId, inputId, onChange) {
     this.card = document.getElementById(cardId);
     this.terminal = document.querySelector(`#${terminalId} .content`);
     this.terminalContainer = document.getElementById(terminalId);
@@ -116,6 +130,8 @@ class Simulator {
     this.slider = document.getElementById(sliderId);
     this.display = document.getElementById(displayId);
     this.manualControl = document.getElementById(manualControlId);
+    this.staticTpsDisplay = document.getElementById(staticTpsId);
+    this.onChange = onChange;
 
     this.tps = 50;
     this.isActive = false;
@@ -133,22 +149,31 @@ class Simulator {
     this.slider.addEventListener('input', (e) => {
       const val = parseInt(e.target.value);
       this.display.textContent = val;
-      if (this.comboBox.input.value === 'Manual Control') {
+      if (this.comboBox.input.value === 'Manual Control' || this.comboBox.input.value === '') {
         this.tps = val;
         this.updateStats();
+        this.onChange();
       }
     });
   }
 
   handleSelection(val) {
-    if (val === 'Manual Control') {
+    if (val === 'Manual Control' || val === '') {
       this.manualControl.classList.remove('hidden');
+      if (this.staticTpsDisplay) this.staticTpsDisplay.classList.add('hidden');
       this.tps = parseInt(this.slider.value);
     } else {
       this.manualControl.classList.add('hidden');
-      this.tps = MODELS[val];
+      if (this.staticTpsDisplay) {
+        this.staticTpsDisplay.classList.remove('hidden');
+        this.tps = MODELS[val];
+        this.staticTpsDisplay.textContent = `${this.tps} TPS`;
+      } else {
+        this.tps = MODELS[val];
+      }
     }
     this.updateStats();
+    this.onChange();
   }
 
   start() {
@@ -204,18 +229,58 @@ class Simulator {
     this.statsTps.textContent = `Current TPS: ${this.tps}`;
     this.statsTokens.textContent = `Tokens: ${this.tokenCount}`;
   }
+
+  getState() {
+    const modelValue = this.comboBox.input.value;
+    return {
+      model: modelValue || 'Manual Control',
+      tps: this.tps
+    };
+  }
+
+  setState(state) {
+    if (state.model) {
+      this.comboBox.setValue(state.model);
+    }
+    if (state.model === 'Manual Control' && state.tps) {
+      this.slider.value = state.tps;
+      this.display.textContent = state.tps;
+      this.tps = state.tps;
+      this.updateStats();
+    }
+  }
+}
+
+// State Management
+function syncUrl() {
+  const params = new URLSearchParams();
+  const stateA = simA.getState();
+  const stateB = simB.getState();
+  const isComparing = !cardB.classList.contains('hidden');
+
+  params.set('mA', stateA.model);
+  if (stateA.model === 'Manual Control') params.set('tA', stateA.tps);
+
+  if (isComparing) {
+    params.set('compare', '1');
+    params.set('mB', stateB.model);
+    if (stateB.model === 'Manual Control') params.set('tB', stateB.tps);
+  }
+
+  const newUrl = `${window.location.pathname}?${params.toString()}`;
+  window.history.replaceState({}, '', newUrl);
 }
 
 const simA = new Simulator(
   'card-a', 'terminal-a', 'stats-a-tps', 'stats-a-tokens',
-  'tps-slider-a', 'tps-display-a', 'manual-control-a',
-  'combo-a', 'model-a-options', 'model-a-input'
+  'tps-slider-a', 'tps-display-a', 'manual-control-a', 'static-tps-a',
+  'combo-a', 'model-a-options', 'model-a-input', syncUrl
 );
 
 const simB = new Simulator(
   'card-b', 'terminal-b', 'stats-b-tps', 'stats-b-tokens',
-  'tps-slider-b', 'tps-display-b', 'manual-control-b',
-  'combo-b', 'model-b-options', 'model-b-input'
+  'tps-slider-b', 'tps-display-b', 'manual-control-b', 'static-tps-b',
+  'combo-b', 'model-b-options', 'model-b-input', syncUrl
 );
 
 const compareToggleBtn = document.getElementById('compare-toggle-btn');
@@ -223,7 +288,7 @@ const closeBBtn = document.getElementById('close-b-btn');
 const comparisonContainer = document.getElementById('comparison-container');
 const cardB = document.getElementById('card-b');
 
-function toggleComparison(show) {
+function toggleComparison(show, silent = false) {
   if (show) {
     cardB.classList.remove('hidden');
     comparisonContainer.classList.remove('single-view');
@@ -234,10 +299,35 @@ function toggleComparison(show) {
     compareToggleBtn.classList.remove('hidden');
     simB.stop();
   }
+  if (!silent) syncUrl();
 }
 
 compareToggleBtn.addEventListener('click', () => toggleComparison(true));
 closeBBtn.addEventListener('click', () => toggleComparison(false));
+
+// Load initial state
+function loadState() {
+  const params = new URLSearchParams(window.location.search);
+
+  if (params.has('mA')) {
+    simA.setState({
+      model: params.get('mA'),
+      tps: parseInt(params.get('tA'))
+    });
+  }
+
+  if (params.get('compare') === '1') {
+    toggleComparison(true, true);
+    if (params.has('mB')) {
+      simB.setState({
+        model: params.get('mB'),
+        tps: parseInt(params.get('tB'))
+      });
+    }
+  }
+}
+
+loadState();
 
 document.getElementById('start-btn').addEventListener('click', () => {
   simA.start();

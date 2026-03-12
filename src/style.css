@@ -193,14 +193,51 @@ input[type="range"] {
   color: #0f172a;
 }
 
-@media (max-width: 1024px) {
-  .comparison-grid {
-    grid-template-columns: 1fr;
-  }
+.combo-arrow {
+  position: absolute;
+  right: 1rem;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 0.7rem;
+  color: #64748b;
+  pointer-events: none;
+  transition: transform 0.2s;
 }
 
-.hidden {
-  display: none !important;
+.combo-box:focus-within .combo-arrow {
+  color: var(--primary);
+  transform: translateY(-50%) rotate(180deg);
+}
+
+.github-link {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--glass-bg);
+  backdrop-filter: blur(12px);
+  padding: 0.75rem 1.25rem;
+  border-radius: 2rem;
+  border: 1px solid var(--border-color);
+  color: white;
+  text-decoration: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  z-index: 1000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.github-link:hover {
+  border-color: var(--primary);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px var(--primary-glow);
+}
+
+.github-link svg {
+  opacity: 0.8;
 }
 
 .mini-slider {
@@ -347,4 +384,8 @@ select {
   display: flex;
   gap: 1rem;
   margin-top: 1rem;
+}
+
+.hidden {
+  display: none;
 }
